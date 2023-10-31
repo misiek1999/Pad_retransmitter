@@ -1,5 +1,16 @@
 {
     "files.associations": {
-        "uni_bt_allowlist.h": "c"
+        "uni_bt_allowlist.h": "c",
+        "esp_log.h": "c",
+        "gpio.h": "c",
+        "btstack_run_loop_freertos.h": "c",
+        "btstack_run_loop.h": "c",
+        "stdint.h": "c",
+        "lc3.h": "c",
+        "uecc.h": "c",
+        "config.h": "c",
+        "oi_assert.h": "c",
+        "oi_codec_sbc.h": "c",
+        "nvs.h": "c"
     }
 }
