@@ -15,6 +15,7 @@
             "-<example>",
             "-<platform>",
             "-<port>",
+            "-<test>",
             "-<3rd-party/lc3-google/test>",
             "-<3rd-party/lc3-google/tools>",
             "-<3rd-party/lwip/core>",
@@ -22,7 +23,8 @@
             "-<3rd-     /micro-ecc/test>",
             "+<platform/embedded>",
             "+<platform/freertos>",
-            "+<port/esp32/components/btstack>"
+            "+<port/esp32/components/btstack>",
+            "-<port/esp32/components/btstack/btstack_audio_esp32_v5.c>"
         ],
         "flags": [
             "-I 3rd-party/lc3-google/include",

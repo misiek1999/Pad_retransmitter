@@ -52,7 +52,6 @@
 
 #include "uni_bt_le.h"
 
-#include <bluetooth_data_types.h>
 #include <btstack.h>
 #include <btstack_config.h>
 #include <inttypes.h>
@@ -75,7 +74,7 @@ static bool is_scanning;
 static bool ble_enabled;
 
 // Temporal space for SDP in BLE
-static uint8_t hid_descriptor_storage[512];
+static uint8_t hid_descriptor_storage[500];
 static btstack_packet_callback_registration_t sm_event_callback_registration;
 
 /**
@@ -180,14 +179,10 @@ static void get_advertisement_data(const uint8_t* adv_data, uint8_t adv_size, ui
                 logi("device id: %#x\n", little_endian_read_16(data, 0));
                 break;
             case BLUETOOTH_DATA_TYPE_LE_BLUETOOTH_DEVICE_ADDRESS:
-            case BLUETOOTH_DATA_TYPE_MESH_BEACON:
-            case BLUETOOTH_DATA_TYPE_MESH_MESSAGE:
-                // Safely ignore these messages
                 break;
             case BLUETOOTH_DATA_TYPE_SECURITY_MANAGER_OUT_OF_BAND_FLAGS:
-                // fall-through
             default:
-                logi("Advertising Data Type 0x%2x not handled yet\n", data_type);
+                printf("Advertising Data Type 0x%2x not handled yet\n", data_type);
                 break;
         }
     }
@@ -231,7 +226,8 @@ static void parse_report(uint8_t* packet, uint16_t size) {
         descriptor_data = hids_client_descriptor_storage_get_descriptor_data(hids_cid, service_index);
         descriptor_len = hids_client_descriptor_storage_get_descriptor_len(hids_cid, service_index);
 
-        uni_hid_device_set_hid_descriptor(device, descriptor_data, descriptor_len);
+        device->hid_descriptor_len = descriptor_len;
+        memcpy(device->hid_descriptor, descriptor_data, sizeof(device->hid_descriptor));
     }
     report_data = gattservice_subevent_hid_report_get_report(packet);
     report_len = gattservice_subevent_hid_report_get_report_len(packet);
@@ -554,7 +550,7 @@ static void sm_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t* pa
             logi("Display Passkey: %" PRIu32 "\n", sm_event_passkey_display_number_get_passkey(packet));
             break;
         case SM_EVENT_IDENTITY_RESOLVING_STARTED:
-            logi("SM_EVENT_IDENTITY_RESOLVING_STARTED\n");
+            logi("SM_EVENT_PAIRING_STARTED\n");
             break;
         case SM_EVENT_IDENTITY_RESOLVING_FAILED:
             sm_event_identity_created_get_address(packet, addr);
@@ -681,7 +677,6 @@ void uni_bt_le_on_hci_event_le_meta(const uint8_t* packet, uint16_t size) {
             // Safely ignore it, we handle the GAP advertising report instead
             break;
 
-        case HCI_SUBEVENT_LE_CONNECTION_UPDATE_COMPLETE:
         case HCI_SUBEVENT_LE_READ_REMOTE_FEATURES_COMPLETE:
             // Ignore it
             break;
@@ -744,7 +739,7 @@ void uni_bt_le_on_gap_event_advertising_report(const uint8_t* packet, uint16_t s
     adv_event_get_data(packet, &appearance, name);
 
     if (appearance != UNI_BT_HID_APPEARANCE_GAMEPAD && appearance != UNI_BT_HID_APPEARANCE_JOYSTICK &&
-        appearance != UNI_BT_HID_APPEARANCE_MOUSE && appearance != UNI_BT_HID_APPEARANCE_KEYBOARD) {
+        appearance != UNI_BT_HID_APPEARANCE_MOUSE) {
         // Don't log it. There too many devices advertising themselves.
         return;
     }
@@ -759,7 +754,7 @@ void uni_bt_le_on_gap_event_advertising_report(const uint8_t* packet, uint16_t s
          bd_addr_to_str(addr));
 
     // Allowlist is only valid for "public" addresses. Doesn't make sense with random ones.
-    if (addr_type == 0 && !uni_bt_allowlist_is_allowed_addr(addr)) {
+    if (addr_type == 0 && !uni_bt_allowlist_allow_addr(addr)) {
         logi("Ignoring device, not in allow-list: %s\n", bd_addr_to_str(addr));
         return;
     }
@@ -783,10 +778,6 @@ void uni_bt_le_on_gap_event_advertising_report(const uint8_t* packet, uint16_t s
         case UNI_BT_HID_APPEARANCE_GAMEPAD:
             uni_hid_device_set_cod(d, UNI_BT_COD_MAJOR_PERIPHERAL | UNI_BT_COD_MINOR_GAMEPAD);
             logi("Device '%s' identified as Gamepad\n", name);
-            break;
-        case UNI_BT_HID_APPEARANCE_KEYBOARD:
-            uni_hid_device_set_cod(d, UNI_BT_COD_MAJOR_PERIPHERAL | UNI_BT_COD_MINOR_KEYBOARD);
-            logi("Device '%s' identified as Keyboard\n", name);
             break;
         default:
             loge("Unsupported appearance: %#x\n", appearance);

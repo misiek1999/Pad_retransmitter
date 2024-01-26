@@ -23,7 +23,6 @@ limitations under the License.
 #include <btstack.h>
 
 #include "sdkconfig.h"
-#include "uni_balance_board.h"
 #include "uni_bt.h"
 #include "uni_bt_bredr.h"
 #include "uni_bt_defines.h"
@@ -56,10 +55,6 @@ static fn_t setup_fns[] = {
 };
 static setup_state_t setup_state = SETUP_STATE_BTSTACK_IN_PROGRESS;
 static btstack_packet_callback_registration_t hci_event_callback_registration;
-
-// SDP
-//#define MAX_ATTRIBUTE_VALUE_SIZE 300
-// static uint8_t hid_descriptor_storage[MAX_ATTRIBUTE_VALUE_SIZE];
 
 static void maybe_delete_or_list_link_keys(void) {
     int32_t delete_keys = uni_get_platform()->get_property(UNI_PLATFORM_PROPERTY_DELETE_STORED_KEYS);
@@ -123,11 +118,6 @@ static void setup_call_next_fn(void) {
         if (IS_ENABLED(UNI_ENABLE_BLE))
             uni_bt_le_scan_start();
 
-        // Bluepad32 services that needs to be initialized once
-        // the rest of the system is ready.
-        uni_balance_board_on_init_complete();
-
-        // Finaly initialize the "platform"
         uni_get_platform()->on_init_complete();
         uni_get_platform()->on_oob_event(UNI_PLATFORM_OOB_BLUETOOTH_ENABLED, (void*)true);
     }
@@ -197,10 +187,6 @@ int uni_bt_setup(void) {
 
     if (IS_ENABLED(UNI_ENABLE_BLE) && ble_enabled)
         uni_bt_le_setup();
-
-    // Initialize HID Host
-    // hid_host_init(hid_descriptor_storage, sizeof(hid_descriptor_storage));
-    // hid_host_register_packet_handler(uni_bt_packet_handler);
 
     // Disable stdout buffering
     setbuf(stdout, NULL);

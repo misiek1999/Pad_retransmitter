@@ -44,7 +44,6 @@
  *  Callbacks are executed on main thread via data source and btstack_run_loop_poll_data_sources_from_irq
  */
 
-#include "btstack_bool.h"
 #include "btstack_debug.h"
 #include "btstack_uart_block.h"
 #include "btstack_run_loop.h"
@@ -59,9 +58,9 @@ static const btstack_uart_config_t * btstack_uart_block_configuration;
 // data source for integration with BTstack Runloop
 static btstack_data_source_t transport_data_source;
 
-static bool send_complete;
-static bool receive_complete;
-static bool wakeup_event;
+static int send_complete;
+static int receive_complete;
+static int wakeup_event;
 
 // callbacks
 static void (*block_sent)(void);
@@ -70,17 +69,17 @@ static void (*wakeup_handler)(void);
 
 
 static void btstack_uart_block_received(void){
-    receive_complete = true;
+    receive_complete = 1;
     btstack_run_loop_poll_data_sources_from_irq();
 }
 
 static void btstack_uart_block_sent(void){
-    send_complete = true;
+    send_complete = 1;
     btstack_run_loop_poll_data_sources_from_irq();
 }
 
 static void btstack_uart_cts_pulse(void){
-    wakeup_event = true;
+    wakeup_event = 1;
     btstack_run_loop_poll_data_sources_from_irq();
 }
 
@@ -96,20 +95,20 @@ static void btstack_uart_embedded_process(btstack_data_source_t *ds, btstack_dat
     switch (callback_type){
         case DATA_SOURCE_CALLBACK_POLL:
             if (send_complete){
-                send_complete = false;
-                if (block_sent != NULL){
+                send_complete = 0;
+                if (block_sent){
                     block_sent();
                 }
             }
             if (receive_complete){
-                receive_complete = false;
-                if (block_received != NULL){
+                receive_complete = 0;
+                if (block_received){
                     block_received();
                 }
             }
             if (wakeup_event){
-                wakeup_event = false;
-                if (wakeup_handler != NULL){
+                wakeup_event = 0;
+                if (wakeup_handler){
                     wakeup_handler();
                 }
             }

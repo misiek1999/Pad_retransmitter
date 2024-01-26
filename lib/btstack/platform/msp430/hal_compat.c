@@ -35,7 +35,7 @@
  *
  */
 
-#define BTSTACK_FILE__ "hal_compat.c"
+#define __BTSTACK_FILE__ "hal_compat.c"
 
  /**
  * various functions to deal with flaws and portability issues

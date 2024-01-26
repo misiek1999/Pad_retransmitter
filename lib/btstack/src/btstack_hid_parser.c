@@ -202,9 +202,11 @@ static void btstack_hid_handle_global_item(btstack_hid_parser_t * parser, hid_de
             break;
         case ReportID:
             if (parser->active_record && (parser->global_report_id != item->item_value)){
+                // log_debug("New report, don't match anymore");
                 parser->active_record = 0;
             }
             parser->global_report_id = item->item_value;
+            // log_info("- Report ID: %02x", parser->global_report_id);
             break;
         case ReportCount:
             parser->global_report_count = item->item_value;
@@ -226,9 +228,6 @@ static void btstack_hid_handle_global_item(btstack_hid_parser_t * parser, hid_de
 }
 
 static void hid_find_next_usage(btstack_hid_parser_t * parser){
-    bool have_usage_min = false;
-    bool have_usage_max = false;
-    parser->usage_range = false;
     while ((parser->available_usages == 0u) && (parser->usage_pos < parser->descriptor_pos)){
         hid_descriptor_item_t usage_item;
         // parser->usage_pos < parser->descriptor_pos < parser->descriptor_len
@@ -245,21 +244,19 @@ static void hid_find_next_usage(btstack_hid_parser_t * parser){
                     break;
                 case UsageMinimum:
                     parser->usage_minimum = usage_value;
-                    have_usage_min = true;
+                    parser->have_usage_min = 1;
                     break;
                 case UsageMaximum:
                     parser->usage_maximum = usage_value;
-                    have_usage_max = true;
+                    parser->have_usage_max = 1;
                     break;
                 default:
                     break;
             }
-            if (have_usage_min && have_usage_max){
+            if (parser->have_usage_min && parser->have_usage_max){
                 parser->available_usages = parser->usage_maximum - parser->usage_minimum + 1u;
-                parser->usage_range = true;
-                if (parser->available_usages < parser->required_usages){
-                    log_debug("Usage Min - Usage Max [%04x..%04x] < Report Count %u", parser->usage_minimum & 0xffff, parser->usage_maximum & 0xffff, parser->required_usages);
-                }
+                parser->have_usage_min = 0;
+                parser->have_usage_max = 0;
             }
         }
         parser->usage_pos += usage_item.item_size;
@@ -343,7 +340,7 @@ static void btstack_hid_parser_find_next_usage(btstack_hid_parser_t * parser){
             if (parser->available_usages) {
                 parser->state = BTSTACK_HID_PARSER_USAGES_AVAILABLE;
             } else {
-                log_debug("no usages found");
+                log_error("no usages found");
                 parser->state = BTSTACK_HID_PARSER_COMPLETE;
             }
         } else {
@@ -407,12 +404,6 @@ void btstack_hid_parser_get_field(btstack_hid_parser_t * parser, uint16_t * usag
     if (is_variable){
         parser->usage_minimum++;
         parser->available_usages--;
-        if (parser->usage_range && (parser->usage_minimum > parser->usage_maximum)){
-            // usage min - max range smaller than report count, ignore remaining bit in report
-            log_debug("Ignoring %u items without Usage", parser->required_usages);
-            parser->report_pos_in_bit += parser->global_report_size * parser->required_usages;
-            parser->required_usages = 0;
-        }
     } else {
         if (parser->required_usages == 0u){
             parser->available_usages = 0;
@@ -450,9 +441,11 @@ int btstack_hid_get_report_size_for_id(int report_id, hid_report_type_t report_t
                         current_report_id = item.item_value;
                         break;
                     case ReportCount:
+                        if (current_report_id != report_id) break;
                         report_count = item.item_value;
                         break;
                     case ReportSize:
+                        if (current_report_id != report_id) break;
                         report_size = item.item_value;
                         break;
                     default:
@@ -479,11 +472,12 @@ int btstack_hid_get_report_size_for_id(int report_id, hid_report_type_t report_t
                 }
                 if (!valid_report_type) break;
                 total_report_size += report_count * report_size;
+                report_size = 0;
+                report_count = 0;
                 break;
             default:
                 break;
         }
-		if (total_report_size > 0 && current_report_id != report_id) break;
         hid_descriptor_len -= item.item_size;
         hid_descriptor += item.item_size;
     }

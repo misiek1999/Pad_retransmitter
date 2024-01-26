@@ -4,58 +4,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.10.3] - 2023-11-26
-### New
-- Atari Wireless Joystick: Add support for it
-
-### Changed
-- Allowlist: rename `uni_bt_allowlist_allow_addr()` to `uni_bt_allowlist_is_allowed_addr()`
-
-## [3.10.2] - 2023-11-13
-### Changed
-- BTstack: Upgraded to latest develop branch as of 2023-11-13
-
-### Fixed
-- Xbox: Axis works Ok (fixed in latest BTstack)
-
-## [3.10.1] - 2023-11-05
-### New
-- Arduino: API to handle keyboard
-  - `Controller.isKeyboard()`
-  - `Controller.isKeypressed(KeyboardKey)`
-  - Sketch.cpp updated with Keyboard,Mouse,Gamepad,BalanceBoard code
-
-### Changed
-  - Kconfig: Log Level "choice" and "int" as log level verbosity
-    - Easier to handle in code. Doesn't "pollute" the Kconfig options
-
-### Fixed
-- Arduino: Correctly report Keyboard/Mouse types [Github Issue #48][github_issue_48]
-- Keyboard: Typos in Keyboard constants
-
-[github_issue_48]: https://github.com/ricardoquesada/bluepad32/issues/48
-
-## [3.10.0] - 2023-11-02
-### New
-- Keyboard support (BETA, might change in the futrure):
-  - Bluetooth keyboard are supported: Up to 10 keys pressed at the same time + modifiers
-  - Unijoysticle:
-    - Keyboard behaves like a joystick using arrow keys or ASDW
-    - Press "Escape" to change Joystick ports
-    - Press "Tab" to change Modes
-
-### Changed
-- Custom platform:
-  - "uni_platform_custom_1" renamed to "my_platform"
-  - Removed main/Kconfig. Keeping the configuration simpler.
-- Arduino:
-  - Virtual Devices disabled by default
-  - Added `BP32.enableVirtualDevice(bool)` API in BP32 namespace
-  - Sketch shows how to use it
-
-### Fixed
-- Tank Mouse (Bluetooth version) works Ok. Good for Amiga users using Unijoysticle.
-
 ## [v3.9.1] - 2023-10-13
 ### New
 - "custom platform":

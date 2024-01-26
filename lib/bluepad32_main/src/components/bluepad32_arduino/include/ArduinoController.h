@@ -16,7 +16,6 @@
 
 #include "ArduinoControllerData.h"
 #include "ArduinoControllerProperties.h"
-#include "ArduinoKeyboardConstants.h"
 
 class Controller {
    public:
@@ -156,11 +155,6 @@ class Controller {
     int temperature() const { return _data.balance_board.temperature; }
 
     //
-    // Keyboard related
-    //
-    bool isKeyPressed(KeyboardKey key) const;
-
-    //
     // Shared among all
     //
 
@@ -172,7 +166,6 @@ class Controller {
     bool isGamepad() const { return _data.klass == UNI_CONTROLLER_CLASS_GAMEPAD; }
     bool isMouse() const { return _data.klass == UNI_CONTROLLER_CLASS_MOUSE; }
     bool isBalanceBoard() const { return _data.klass == UNI_CONTROLLER_CLASS_BALANCE_BOARD; }
-    bool isKeyboard() const { return _data.klass == UNI_CONTROLLER_CLASS_KEYBOARD; }
     int8_t index() const { return _idx; }
 
     bool isConnected() const;
@@ -192,7 +185,6 @@ class Controller {
    private:
     void onConnected();
     void onDisconnected();
-    bool isModifierPressed(KeyboardKey key) const;
 
     bool _connected;
     // Controller index, from 0 to 3.

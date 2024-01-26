@@ -1,4 +1,4 @@
-#define BTSTACK_FILE__ "main.c"
+#define __BTSTACK_FILE__ "main.c"
 
 #include "asf.h"
 #include "stdio_serial.h"

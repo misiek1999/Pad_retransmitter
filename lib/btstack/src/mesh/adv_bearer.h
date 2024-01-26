@@ -36,8 +36,8 @@
  */
 
 
-#ifndef ADV_BEARER_H
-#define ADV_BEARER_H
+#ifndef __ADV_BEARER_H
+#define __ADV_BEARER_H
 
 #include <stdint.h>
 

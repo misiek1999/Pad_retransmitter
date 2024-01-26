@@ -35,7 +35,7 @@
  *
  */
 
-#define BTSTACK_FILE__ "hci_transport_h4.c"
+#define __BTSTACK_FILE__ "hci_transport_h4.c"
 
 /*
  *  port.c

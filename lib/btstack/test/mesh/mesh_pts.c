@@ -35,7 +35,7 @@
  *
  */
 
-#define BTSTACK_FILE__ "mesh_pts.c"
+#define __BTSTACK_FILE__ "mesh_pts.c"
 
 #include <stdint.h>
 #include <stdio.h>

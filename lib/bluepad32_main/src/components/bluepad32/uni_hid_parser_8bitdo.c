@@ -188,53 +188,53 @@ void uni_hid_parser_8bitdo_parse_usage(uni_hid_device_t* d,
         case HID_USAGE_PAGE_KEYBOARD_KEYPAD:
             // Used by 8BitDo Zero 2 in Keyboard mode
             switch (usage) {
-                case HID_USAGE_KB_NONE:
+                case 0x00:
                     // Unknown, but it is reported in each report
                     break;
-                case HID_USAGE_KB_C:
+                case 0x06:
                     ctl->gamepad.dpad |= value ? DPAD_UP : 0;
                     break;
-                case HID_USAGE_KB_D:
+                case 0x07:
                     ctl->gamepad.dpad |= value ? DPAD_DOWN : 0;
                     break;
-                case HID_USAGE_KB_E:
+                case 0x08:
                     ctl->gamepad.dpad |= value ? DPAD_LEFT : 0;
                     break;
-                case HID_USAGE_KB_F:
+                case 0x09:
                     ctl->gamepad.dpad |= value ? DPAD_RIGHT : 0;
                     break;
-                case HID_USAGE_KB_G:
+                case 0x0a:
                     ctl->gamepad.buttons |= value ? BUTTON_B : 0;
                     break;
-                case HID_USAGE_KB_H:
+                case 0x0b:
                     ctl->gamepad.buttons |= value ? BUTTON_Y : 0;
                     break;
-                case HID_USAGE_KB_I:
+                case 0x0c:
                     ctl->gamepad.buttons |= value ? BUTTON_X : 0;
                     break;
-                case HID_USAGE_KB_J:
+                case 0x0d:
                     ctl->gamepad.buttons |= value ? BUTTON_A : 0;
                     break;
-                case HID_USAGE_KB_K:
+                case 0x0e:
                     ctl->gamepad.buttons |= value ? BUTTON_SHOULDER_L : 0;
                     break;
-                case HID_USAGE_KB_M:
+                case 0x10:
                     ctl->gamepad.buttons |= value ? BUTTON_SHOULDER_R : 0;
                     break;
-                case HID_USAGE_KB_N:
+                case 0x11:
                     ctl->gamepad.misc_buttons |= value ? MISC_BUTTON_SELECT : 0;
                     break;
-                case HID_USAGE_KB_O:
+                case 0x12:
                     ctl->gamepad.misc_buttons |= value ? MISC_BUTTON_START : 0;
                     break;
-                case HID_USAGE_KB_LEFT_CONTROL:
-                case HID_USAGE_KB_LEFT_SHIFT:
-                case HID_USAGE_KB_LEFT_ALT:
-                case HID_USAGE_KB_LEFT_GUI:
-                case HID_USAGE_KB_RIGHT_CONTROL:
-                case HID_USAGE_KB_RIGHT_SHIFT:
-                case HID_USAGE_KB_RIGHT_ALT:
-                case HID_USAGE_KB_RIGHT_GUI:
+                case 0xe0:
+                case 0xe1:
+                case 0xe2:
+                case 0xe3:
+                case 0xe4:
+                case 0xe5:
+                case 0xe6:
+                case 0xe7:
                     // Shift / Control / Alt keys. Ignore
                     break;
                 default:

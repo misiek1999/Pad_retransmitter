@@ -15,6 +15,7 @@
             "+<**/*.c>",
             "+<**/*.cpp>",
             "-<tools>",
+            "-<src/main>",
             "-<src/utility/spi_drv.cpp>",
             "-<src/components/cmd_nvs/cmd_nvs.c>",
             "-<src/components/cmd_system/cmd_system.c>"
@@ -25,7 +26,9 @@
             "-I src/components/cmd_system",
             "-I src/components/bluepad32",
             "-I src/components/bluepad32/include",
-            "-I src/components/bluepad32_arduino/include"
+            "-I src/components/bluepad32_arduino/include",
+            "-D app_main=app_main_to_delete",
+            "-D sdp_init=sdp_init2"
         ]
     }
 }

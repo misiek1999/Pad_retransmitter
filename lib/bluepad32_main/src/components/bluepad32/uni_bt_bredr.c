@@ -31,6 +31,7 @@ limitations under the License.
 #include "uni_common.h"
 #include "uni_config.h"
 #include "uni_log.h"
+#include "uni_platform.h"
 
 // These are the only two supported platforms with BR/EDR support.
 #if !(defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_TARGET_LIBUSB))
@@ -186,7 +187,7 @@ void uni_bt_bredr_setup(void) {
     // TODO: Do we need EIR, since the name will be requested if not provided?
     hci_set_inquiry_mode(INQUIRY_MODE_RSSI_AND_EIR);
 
-    // try to become master on incoming connections
+    // btstack_stdin_setup(stdin_process);
     hci_set_master_slave_policy(HCI_ROLE_MASTER);
 
     logi("Gap security level: %d\n", security_level);
@@ -355,7 +356,7 @@ void uni_bt_bredr_on_l2cap_incoming_connection(uint16_t channel, const uint8_t* 
         "channel=0x%04x, addr=%s\n",
         psm, local_cid, remote_cid, handle, channel, bd_addr_to_str(event_addr));
 
-    if (!uni_bt_allowlist_is_allowed_addr(event_addr)) {
+    if (!uni_bt_allowlist_allow_addr(event_addr)) {
         loge("Declining incoming connection: Device not in allow-list: %s\n", bd_addr_to_str(event_addr));
         l2cap_decline_connection(channel);
         return;
@@ -566,7 +567,7 @@ void uni_bt_bredr_on_gap_inquiry_result(uint16_t channel, const uint8_t* packet,
     }
     logi("\n");
 
-    if (!uni_bt_allowlist_is_allowed_addr(addr)) {
+    if (!uni_bt_allowlist_allow_addr(addr)) {
         loge("Ignoring device, not in allow-list: %s\n", bd_addr_to_str(addr));
         return;
     }
@@ -692,7 +693,7 @@ void uni_bt_bredr_on_hci_pin_code_request(uint16_t channel, const uint8_t* packe
     ARG_UNUSED(size);
 
     // TODO: Move to uni_bt_bredr.c
-    bool is_mouse_or_keyboard = false;
+    bool is_mouse = false;
 
     logi("--> HCI_EVENT_PIN_CODE_REQUEST\n");
     hci_event_pin_code_request_get_bd_addr(packet, event_addr);
@@ -700,19 +701,16 @@ void uni_bt_bredr_on_hci_pin_code_request(uint16_t channel, const uint8_t* packe
     if (!d) {
         loge("Failed to get device for: %s, assuming it is not a mouse\n", bd_addr_to_str(event_addr));
     } else {
-        is_mouse_or_keyboard =
-            ((d->cod & UNI_BT_COD_MAJOR_MASK) == UNI_BT_COD_MAJOR_PERIPHERAL) &&  // Is it a peripheral ?
-            (d->cod & UNI_BT_COD_MINOR_KEYBOARD_AND_MICE);                        // and is it a mouse or keyboard ?
+        uint32_t mouse_cod = UNI_BT_COD_MAJOR_PERIPHERAL | UNI_BT_COD_MINOR_MICE;
+        is_mouse = (d->cod & mouse_cod) == mouse_cod;
     }
 
-    if (is_mouse_or_keyboard) {
-        // For mouse/keyboard, use "0000" as pins, which seems to be the expected one.
-        // "1234" could also be a valid pin.
+    if (is_mouse) {
+        // For mice, use "0000" as pins, which seems to be the expected one.
         logi("Using PIN code: '0000'\n");
         gap_pin_code_response_binary(event_addr, (uint8_t*)"0000", 4);
     } else {
         // FIXME: Assumes incoming connection from Nintendo Wii using Sync.
-        // Move as a plugin to Wii code.
         //
         // From: https://wiibrew.org/wiki/Wiimote#Bluetooth_Pairing:
         //  If connecting by holding down the 1+2 buttons, the PIN is the

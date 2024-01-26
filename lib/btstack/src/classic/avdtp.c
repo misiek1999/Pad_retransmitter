@@ -316,13 +316,7 @@ static void avdtp_handle_start_sdp_client_query(void * context){
 uint8_t avdtp_connect(bd_addr_t remote, avdtp_role_t role, uint16_t * avdtp_cid){
     avdtp_connection_t * connection = avdtp_get_connection_for_bd_addr(remote);
     if (connection){
-        // allow to call avdtp_connect after signaling connection was triggered remotely
-        // @note this also allows to call avdtp_connect again before SLC is complete
-        if (connection->state < AVDTP_SIGNALING_CONNECTION_OPENED){
-            return ERROR_CODE_SUCCESS;
-        } else {
-            return ERROR_CODE_COMMAND_DISALLOWED;
-        }
+        return ERROR_CODE_COMMAND_DISALLOWED;
     }
 
     uint16_t cid = avdtp_get_next_cid();
@@ -688,7 +682,7 @@ static void avdtp_handle_sdp_query_succeeded(avdtp_connection_t * connection){
             break;
         default:
             connection->state = AVDTP_SIGNALING_CONNECTION_W4_L2CAP_CONNECTED;
-            l2cap_create_channel(avdtp_packet_handler, connection->remote_addr, connection->avdtp_l2cap_psm, AVDTP_L2CAP_MTU, NULL);
+            l2cap_create_channel(avdtp_packet_handler, connection->remote_addr, connection->avdtp_l2cap_psm, l2cap_max_mtu(), NULL);
             break;
     }
 }
@@ -800,7 +794,7 @@ static void avdtp_retry_timer_timeout_handler(btstack_timer_source_t * timer){
 
     if (connection->state == AVDTP_SIGNALING_CONNECTION_W2_L2CAP_RETRY){
         connection->state = AVDTP_SIGNALING_CONNECTION_W4_L2CAP_CONNECTED;
-        l2cap_create_channel(&avdtp_packet_handler, connection->remote_addr, connection->avdtp_l2cap_psm, AVDTP_L2CAP_MTU, NULL);
+        l2cap_create_channel(&avdtp_packet_handler, connection->remote_addr, connection->avdtp_l2cap_psm, l2cap_max_mtu(), NULL);
     } 
 }
 
@@ -1300,11 +1294,7 @@ uint8_t avdtp_suspend_stream(uint16_t avdtp_cid, uint8_t local_seid){
         return ERROR_CODE_UNKNOWN_CONNECTION_IDENTIFIER;
     }
     
-    if (!is_avdtp_remote_seid_registered(stream_endpoint)){
-        return ERROR_CODE_COMMAND_DISALLOWED;
-    }
-
-    if (stream_endpoint->state != AVDTP_STREAM_ENDPOINT_STREAMING){
+    if (!is_avdtp_remote_seid_registered(stream_endpoint) || stream_endpoint->suspend_stream){
         return ERROR_CODE_COMMAND_DISALLOWED;
     }
 
@@ -1568,22 +1558,6 @@ uint8_t avdtp_choose_sbc_block_length(avdtp_stream_endpoint_t * stream_endpoint,
     return block_length;
 }
 
-uint16_t avdtp_get_highest_sampling_frequency(uint8_t sampling_frequency_bitmap){
-    if (sampling_frequency_bitmap & AVDTP_SBC_48000){
-        return 48000;
-    }
-    if (sampling_frequency_bitmap & AVDTP_SBC_44100){
-        return 44100;
-    }
-    if (sampling_frequency_bitmap & AVDTP_SBC_32000){
-        return 32000;
-    }
-    if (sampling_frequency_bitmap & AVDTP_SBC_16000){
-        return 16000;
-    }
-    return 0;
-}
-
 uint16_t avdtp_choose_sbc_sampling_frequency(avdtp_stream_endpoint_t * stream_endpoint, uint8_t remote_sampling_frequency_bitmap){
     if (!stream_endpoint) return 0;
     uint8_t * media_codec = stream_endpoint->sep.capabilities.media_codec.media_codec_information;
@@ -1604,12 +1578,19 @@ uint16_t avdtp_choose_sbc_sampling_frequency(avdtp_stream_endpoint_t * stream_en
     }
 
     // otherwise, use highest available
-    uint16_t sampling_frequency = avdtp_get_highest_sampling_frequency(supported_sampling_frequency_bitmap);
-    if (sampling_frequency != 0){
-        return sampling_frequency;
-    } else {
-        return 44100; // some default
+    if (supported_sampling_frequency_bitmap & AVDTP_SBC_48000){
+        return 48000;
     }
+    if (supported_sampling_frequency_bitmap & AVDTP_SBC_44100){
+        return 44100;
+    }
+    if (supported_sampling_frequency_bitmap & AVDTP_SBC_32000){
+        return 32000;
+    }
+    if (supported_sampling_frequency_bitmap & AVDTP_SBC_16000){
+        return 16000;
+    } 
+    return 44100; // some default
 }
 
 uint8_t avdtp_choose_sbc_max_bitpool_value(avdtp_stream_endpoint_t * stream_endpoint, uint8_t remote_max_bitpool_value){
@@ -1634,7 +1615,7 @@ uint8_t is_avdtp_remote_seid_registered(avdtp_stream_endpoint_t * stream_endpoin
 void avdtp_init(void){
     if (!avdtp_l2cap_registered){
         avdtp_l2cap_registered = true;
-        l2cap_register_service(&avdtp_packet_handler, BLUETOOTH_PSM_AVDTP, AVDTP_L2CAP_MTU, gap_get_security_level());
+        l2cap_register_service(&avdtp_packet_handler, BLUETOOTH_PSM_AVDTP, 0xffff, gap_get_security_level());
     }
 }
 

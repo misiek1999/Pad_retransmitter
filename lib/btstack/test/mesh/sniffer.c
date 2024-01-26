@@ -35,7 +35,7 @@
  *
  */
 
-#define BTSTACK_FILE__ "gap_le_advertisements.c"
+#define __BTSTACK_FILE__ "gap_le_advertisements.c"
  
 
 // *****************************************************************************

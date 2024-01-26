@@ -35,7 +35,7 @@
  *
  */
 
-#define BTSTACK_FILE__ "hal_audio_f4_discovery.c"
+#define __BTSTACK_FILE__ "hal_audio_f4_discovery.c"
 
 #include "hal_audio.h"
 #include "btstack_debug.h"
