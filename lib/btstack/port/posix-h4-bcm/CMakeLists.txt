@@ -17,22 +17,6 @@ elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
 	# using Visual Studio C++
 endif()
 
-# pkgconfig
-find_package(PkgConfig QUIET)
-
-# portaudio
-if (PgConfig_FOUND)
-	pkg_check_modules(PORTAUDIO REQUIRED portaudio-2.0)
-	if(PORTAUDIO_FOUND)
-		message("HAVE_PORTAUDIO")
-		include_directories(${PORTAUDIO_INCLUDE_DIRS})
-		link_directories(${PORTAUDIO_LIBRARY_DIRS})
-		link_libraries(${PORTAUDIO_LIBRARIES})
-		# CMake 3.12 - add_compile_definitions(HAVE_PORTAUDIO)
-		SET(CMAKE_C_FLAGS  "-DHAVE_PORTAUDIO")
-	endif()
-endif()
-
 # to generate .h from .gatt files
 find_package (Python REQUIRED COMPONENTS Interpreter)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -145,12 +129,32 @@ list(SORT SOURCES)
 # create static lib
 add_library(btstack STATIC ${SOURCES})
 
+# pkgconfig
+find_package(PkgConfig)
+
+# portaudio
+if (PkgConfig_FOUND)
+	pkg_check_modules(PORTAUDIO portaudio-2.0)
+	if(PORTAUDIO_FOUND)
+		message("HAVE_PORTAUDIO")
+		include_directories(${PORTAUDIO_INCLUDE_DIRS})
+		link_directories(${PORTAUDIO_LIBRARY_DIRS})
+		link_libraries(${PORTAUDIO_LIBRARIES})
+		add_compile_definitions(HAVE_PORTAUDIO)
+	endif()
+endif()
+
+# pthread
+find_package(Threads)
+link_libraries(${CMAKE_THREAD_LIBS_INIT})
+
+
 # Add BCM Support
 include(${BTSTACK_ROOT}/chipset/bcm/bcm.cmake)
 
 # CYW55573
-file(DOWNLOAD https://github.com/murata-wireless/meta-murata-wireless/raw/imx-kirkstone-fafnir/recipes-connectivity/murata-binaries/murata-binaries/CYW55560A1_001.002.087.0108.0000.sLNA.hcd
-		${CMAKE_CURRENT_BINARY_DIR}/CYW55560A1_001.002.087.0108.0000.sLNA.hcd)
+file(DOWNLOAD https://github.com/Infineon/combo-bluetooth-firmware/raw/master/CYW5557x/FCBGA/CYW55560A1_001.002.087.0225.0000_Generic_UART_37_4MHz_fcbga_iPA_sLNA_ANT0.hcd
+		${CMAKE_CURRENT_BINARY_DIR}/CYW55560A1_001.002.087.0225.0000_Generic_UART_37_4MHz_fcbga_iPA_sLNA_ANT0.hcd)
 
 # get list of examples, skipping mesh_node_demo
 include(../../example/CMakeLists.txt)

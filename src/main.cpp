@@ -2,7 +2,6 @@
 #include <Bluepad32.h>
 // #include <components/bluepad32_arduino/include/Bluepad32.h>
 
-
 GamepadPtr myGamepads[BP32_MAX_GAMEPADS];
 
 // This callback gets called any time a new gamepad is connected.

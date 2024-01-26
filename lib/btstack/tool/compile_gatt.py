@@ -71,6 +71,10 @@ assigned_uuids = {
     'GAP_PERIPHERAL_PRIVACY_FLAG' : 0x2A02,
     'GAP_RECONNECTION_ADDRESS'    : 0x2A03,
     'GAP_PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS' : 0x2A04,
+    'GAP_CENTRAL_ADDRESS_RESOLUTION' : 0x2aa6,
+    'GAP_RESOLVABLE_PRIVATE_ADDRESS_ONLY' : 0x2AC9,
+    'GAP_ENCRYPTED_DATA_KEY_MATERIAL' : 0x2B88,
+    'GAP_LE_GATT_SECURITY_LEVELS' : 0x2BF5,
     'GATT_SERVICE_CHANGED' : 0x2a05,
     'GATT_CLIENT_SUPPORTED_FEATURES' : 0x2b29,
     'GATT_SERVER_SUPPORTED_FEATURES' : 0x2b3a,
@@ -163,7 +167,7 @@ def read_defines(infile):
     defines = dict()
     with open (infile, 'rt') as fin:
         for line in fin:
-            parts = re.match('#define\s+(\w+)\s+(\w+)',line)
+            parts = re.match('#define\\s+(\\w+)\\s+(\\w+)',line)
             if parts and len(parts.groups()) == 2:
                 (key, value) = parts.groups()
                 defines[key] = int(value, 16)
@@ -871,10 +875,10 @@ def parseLines(fname_in, fin, fout):
 
         if line.startswith("#import"):
             imported_file = ''
-            parts = re.match('#import\s+<(.*)>\w*',line)
+            parts = re.match('#import\\s+<(.*)>\\w*',line)
             if parts and len(parts.groups()) == 1:
                 imported_file = parts.groups()[0]
-            parts = re.match('#import\s+"(.*)"\w*',line)
+            parts = re.match('#import\\s+"(.*)"\\w*',line)
             if parts and len(parts.groups()) == 1:
                 imported_file = parts.groups()[0]
             if len(imported_file) == 0:
@@ -1113,8 +1117,8 @@ try:
     print('Created %s' % filename)
 
 except IOError as e:
-
-    print(usage)
+    parser.print_help() 
+    print(e)
     sys.exit(1)
 
 print('Compilation successful!\n')

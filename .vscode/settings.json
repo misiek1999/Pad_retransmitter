@@ -11,6 +11,7 @@
         "config.h": "c",
         "oi_assert.h": "c",
         "oi_codec_sbc.h": "c",
-        "nvs.h": "c"
+        "nvs.h": "c",
+        "argtable3.h": "c"
     }
 }

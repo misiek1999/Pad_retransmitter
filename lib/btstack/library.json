@@ -1,0 +1,42 @@
+{
+    "name": "btstack",
+    "version": "1.5.6.3",
+    "frameworks": "arduino",
+    "platforms": [
+        "espressif32"
+    ],
+    "build": {
+        "includeDir": ".",
+        "srcDir": ".",
+        "srcFilter": [
+            "+<**/*.c>",
+            "+<**/*.cpp>",
+            "-<chipset>",
+            "-<example>",
+            "-<platform>",
+            "-<port>",
+            "-<3rd-party/lc3-google/test>",
+            "-<3rd-party/lc3-google/tools>",
+            "-<3rd-party/lwip/core>",
+            "-<3rd-party/micro-ecc/test>",
+            "-<3rd-     /micro-ecc/test>",
+            "+<platform/embedded>",
+            "+<platform/freertos>",
+            "+<port/esp32/components/btstack>"
+        ],
+        "flags": [
+            "-I 3rd-party/lc3-google/include",
+            "-I 3rd-party/micro-ecc",
+            "-I 3rd-party/bluedroid/decoder/include",
+            "-I 3rd-party/bluedroid/encoder/include",
+            "-I 3rd-party/md5",
+            "-I 3rd-party/yxml",
+            "-I platform/embedded",
+            "-I platform/freertos",
+            "-I platform/freertos/include",
+            "-I port/esp32/components/btstack",
+            "-I port/esp32/components/btstack/include",
+            "-I src"
+        ]
+    }
+}

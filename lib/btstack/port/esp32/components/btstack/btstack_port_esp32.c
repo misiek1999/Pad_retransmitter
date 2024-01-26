@@ -51,7 +51,6 @@
 #include "btstack_memory.h"
 #include "btstack_run_loop.h"
 #include "btstack_run_loop_freertos.h"
-#include "btstack_run_loop.h"
 #include "btstack_ring_buffer.h"
 #include "btstack_tlv.h"
 #include "btstack_tlv_esp32.h"

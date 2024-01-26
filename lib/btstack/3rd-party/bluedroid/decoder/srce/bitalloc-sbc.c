@@ -28,8 +28,8 @@
 /**@addgroup codec_internal*/
 /**@{*/
 
-#include "oi_codec_sbc_private.h"
-#include ""
+#include <oi_codec_sbc_private.h>
+
 static void dualBitAllocation(OI_CODEC_SBC_COMMON_CONTEXT *common)
 {
     OI_UINT bitcountL;

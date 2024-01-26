@@ -35,7 +35,7 @@
  *
  */
 
-#define __BTSTACK_FILE__ "main.c"
+#define BTSTACK_FILE__ "main.c"
 
 // *****************************************************************************
 //
@@ -167,7 +167,7 @@ int main(int argc, const char * argv[]){
         
     // pick serial port and configure uart driver
     transport_config.device_name = "/dev/tty.usbserial-FT1XBGIM"; // murata m.2 adapter
-
+    printf("tty: %s", transport_config.device_name);
     // get BCM chipset driver
     const btstack_chipset_t * chipset = btstack_chipset_bcm_instance();
     chipset->init(&transport_config);

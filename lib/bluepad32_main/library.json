@@ -1,0 +1,31 @@
+{
+    "name": "bluepad32_main",
+    "version": "3.9.0",
+    "frameworks": "arduino",
+    "platforms": [
+        "espressif32"
+    ],
+    "dependencies": {
+        "name": "btstack"
+    },
+    "build": {
+        "includeDir": ".",
+        "srcDir": ".",
+        "srcFilter": [
+            "+<**/*.c>",
+            "+<**/*.cpp>",
+            "-<tools>",
+            "-<src/utility/spi_drv.cpp>",
+            "-<src/components/cmd_nvs/cmd_nvs.c>",
+            "-<src/components/cmd_system/cmd_system.c>"
+        ],
+        "flags": [
+            "-I src/components",
+            "-I src/components/cmd_nvs_4.4",
+            "-I src/components/cmd_system",
+            "-I src/components/bluepad32",
+            "-I src/components/bluepad32/include",
+            "-I src/components/bluepad32_arduino/include"
+        ]
+    }
+}
