@@ -18,17 +18,19 @@
             "-<src/main>",
             "-<src/utility/spi_drv.cpp>",
             "-<src/components/cmd_nvs/cmd_nvs.c>",
-            "-<src/components/cmd_system/cmd_system.c>"
+            "-<src/components/cmd_system/cmd_system.c>",
+            "-<src/components/bluepad32/uni_platform_arduino_bootstrap.cpp>"
         ],
         "flags": [
+            "-w",
             "-I src/components",
             "-I src/components/cmd_nvs_4.4",
             "-I src/components/cmd_system",
             "-I src/components/bluepad32",
             "-I src/components/bluepad32/include",
             "-I src/components/bluepad32_arduino/include",
-            "-D app_main=app_main_to_delete",
-            "-D sdp_init=sdp_init2"
+            "-D app_main=app_main_disabled",
+            "-D sdp_init(arg)=sdp_init2(arg)"
         ]
     }
 }

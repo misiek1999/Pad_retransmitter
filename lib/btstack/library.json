@@ -27,6 +27,7 @@
             "-<port/esp32/components/btstack/btstack_audio_esp32_v5.c>"
         ],
         "flags": [
+            "-w",
             "-I 3rd-party/lc3-google/include",
             "-I 3rd-party/micro-ecc",
             "-I 3rd-party/bluedroid/decoder/include",
@@ -38,7 +39,8 @@
             "-I platform/freertos/include",
             "-I port/esp32/components/btstack",
             "-I port/esp32/components/btstack/include",
-            "-I src"
+            "-I src",
+            "-D sdp_init(arg)=sdp_init2(arg)"
         ]
     }
 }
