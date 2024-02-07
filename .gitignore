@@ -6,3 +6,4 @@
 .vscode/settings.json
 Makefile
 Makefile.in
+compile_commands.json
