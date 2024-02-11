@@ -7,3 +7,4 @@
 Makefile
 Makefile.in
 compile_commands.json
+generate_compilation_database.py

@@ -9,7 +9,7 @@
 
 namespace BP32Data
 {
-#pragma pack(1) // use 1 byte alignment to avoid padding
+// #pragma pack(1) // use 1 byte alignment to avoid padding
 struct PackedControllerData   // struct copy from bluepad32 library
 {
     int8_t id;          // index of current controller, -1 means no controller is connected

@@ -1,5 +1,5 @@
 #include "Bluepad32_driver.h"
-#include "log_debug.h"
+#include <esp32-hal-log.h>
 #include <btstack.h>
 #include <Bluepad32.h>
 #include <btstack_port_esp32.h>
@@ -15,6 +15,7 @@ extern "C" {
 namespace BP32Driver
 {
 constexpr size_t kBLuepad32TaskMaxStackSize = 20000;
+static constexpr char kBp32Tag[] = "BP32";
 
 std::atomic<bool> _driver_is_init(false);
 
@@ -22,14 +23,14 @@ TaskHandle_t Bluepad32Task;
 std::atomic<bool> driver_setup_complete(false);
 
 void bluepad32_and_btstack_run_loop_execute( void * pvParameters ){
-    LOG_D("Btstack core ID: %d\n", xPortGetCoreID());
+    ESP_LOGD(kBp32Tag, "Btstack core ID: %d", xPortGetCoreID());
 
     // Init btstack
-    LOG_V("Init btstack\n");
+    ESP_LOGV(kBp32Tag, "Init btstack");
     btstack_init();
 
     // Init bluepad32
-    LOG_V("Start initialization bluepad32\n");
+    ESP_LOGV(kBp32Tag, "Start initialization bluepad32");
     uni_property_init();
     uni_platform_init(0, nullptr);
     uni_hid_device_setup();
@@ -37,11 +38,11 @@ void bluepad32_and_btstack_run_loop_execute( void * pvParameters ){
     uni_bt_setup();
     uni_bt_allowlist_init();
     uni_virtual_device_init();
-    LOG_V("Init bluepad32 done\n");
+    ESP_LOGV(kBp32Tag, "Init bluepad32 done");
 
     driver_setup_complete = true;
     btstack_run_loop_execute();
-    LOG_E("Illegal Bluepad32 exit from btstack run loop\n");
+    ESP_LOGE(kBp32Tag, "Illegal Bluepad32 exit from btstack run loop");
 }
 
 void init_driver() {
@@ -50,7 +51,7 @@ void init_driver() {
         _driver_is_init = true;
         // Stop default arduino bluetooth stack
         btStop();
-        LOG_D("Start Btstack task\n");
+        ESP_LOGD(kBp32Tag, "Start Btstack task");
         xTaskCreatePinnedToCore(
                         bluepad32_and_btstack_run_loop_execute, /* Task function. */
                         "btstack_run_loop_execute",             /* name of task. */
@@ -76,9 +77,9 @@ bool BP32Driver::Bluepad32Driver::init() {
         vTaskDelay(1);
     }
     // Get bluetooth firmware and address
-    LOG_D("Firmware: %s\n", BP32.firmwareVersion());
+    ESP_LOGD(kBp32Tag, "Firmware: %s", BP32.firmwareVersion());
     const uint8_t *addr = BP32.localBdAddress();
-    LOG_D("BD Addr: %2X:%2X:%2X:%2X:%2X:%2X\n", addr[0], addr[1], addr[2],
+    ESP_LOGD(kBp32Tag, "BD Addr: %2X:%2X:%2X:%2X:%2X:%2X", addr[0], addr[1], addr[2],
                     addr[3], addr[4], addr[5]);
     // Setup the Bluepad32 callbacks
     BP32.setup(std::bind(&Bluepad32Driver::onConnectedController, this, std::placeholders::_1),
@@ -99,20 +100,25 @@ void BP32Driver::Bluepad32Driver::forgetBluetoothKeys() {
     }
 }
 
-bool BP32Driver::Bluepad32Driver::processGamepad(BP32Data::PackedControllerData &updated_data, size_t gamepad_index) {
+// TODO: Tidy up this function
+bool BP32Driver::Bluepad32Driver::processGamepad(BP32Data::PackedControllerData &updated_data) {
     bool status = false;
-    if (_is_initialized && isIndexValid(gamepad_index)) {
-        status = true;
+    if (_is_initialized) {
         BP32.update();
-        if (_myControllers[gamepad_index] != nullptr && _myControllers[gamepad_index]->isConnected()) {
-            if (_myControllers[gamepad_index]->isGamepad()) {
-                readControllerData(updated_data, _myControllers[gamepad_index]);
-            } else {
-                LOG_W("Connected device is not a gamepad!");
+        for (size_t i = 0; i < BP32_MAX_GAMEPADS; ++i) {
+            ControllerPtr myController = _myControllers[i];
+            if (myController != nullptr && myController->isConnected()) {
+                if (myController->isGamepad()) {
+                    copyControllerData(updated_data, myController);
+                    status = true;
+                } else {
+                    ESP_LOGW(kBp32Tag, "Connected device is not a gamepad!");
+                }
             }
-        } else {
-            updated_data.id = -1;   // no gamepad connected
         }
+    }
+    if (!status) {
+        updated_data.id = -1;
     }
     return status;
 }
@@ -121,7 +127,7 @@ void BP32Driver::Bluepad32Driver::onConnectedController(ControllerPtr ctl) {
   bool foundEmptySlot = false;
   for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
     if (_myControllers[i] == nullptr) {
-      LOG_I("CALLBACK: Controller is connected, index=");
+      ESP_LOGI(kBp32Tag, "CALLBACK: Controller is connected, index=");
       Serial.println(i);
       _myControllers[i] = ctl;
       foundEmptySlot = true;
@@ -129,7 +135,7 @@ void BP32Driver::Bluepad32Driver::onConnectedController(ControllerPtr ctl) {
       // Optional, once the gamepad is connected, request further info about the
       // gamepad.
       const ControllerProperties properties = ctl->getProperties();
-      LOG_D("BTAddr: %02x:%02x:%02x:%02x:%02x:%02x, VID/PID: %04x:%04x, "
+      ESP_LOGD(kBp32Tag, "BTAddr: %02x:%02x:%02x:%02x:%02x:%02x, VID/PID: %04x:%04x, "
               "flags: 0x%02x",
               properties.btaddr[0], properties.btaddr[1], properties.btaddr[2],
               properties.btaddr[3], properties.btaddr[4], properties.btaddr[5],
@@ -138,7 +144,7 @@ void BP32Driver::Bluepad32Driver::onConnectedController(ControllerPtr ctl) {
     }
   }
   if (!foundEmptySlot) {
-    LOG_W("CALLBACK: Controller connected, but could not found empty slot");
+    ESP_LOGW(kBp32Tag, "CALLBACK: Controller connected, but could not found empty slot");
   }
 }
 
@@ -146,7 +152,7 @@ void BP32Driver::Bluepad32Driver::onDisconnectedController(ControllerPtr ctl) {
     bool foundGamepad = false;
     for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
         if (_myControllers[i] == ctl) {
-            LOG_I("CALLBACK: Controller is disconnected from index=");
+            ESP_LOGI(kBp32Tag, "CALLBACK: Controller is disconnected from index=");
             Serial.println(i);
             _myControllers[i] = nullptr;
             foundGamepad = true;
@@ -155,7 +161,7 @@ void BP32Driver::Bluepad32Driver::onDisconnectedController(ControllerPtr ctl) {
     }
 
     if (!foundGamepad) {
-        LOG_W("CALLBACK: Controller disconnected, but not found in myGamepads");
+        ESP_LOGW(kBp32Tag, "CALLBACK: Controller disconnected, but not found in myGamepads");
     }
 }
 
@@ -163,7 +169,7 @@ bool BP32Driver::Bluepad32Driver::isIndexValid(size_t index) const {
     return (index < BP32_MAX_GAMEPADS) ? true : false;
 }
 
-void BP32Driver::Bluepad32Driver::readControllerData(BP32Data::PackedControllerData & data, ControllerPtr controller) {
+void BP32Driver::Bluepad32Driver::copyControllerData(BP32Data::PackedControllerData & data, ControllerPtr controller) {
     data.id = controller->index();
     data.dpad = controller->dpad();
     data.axis_x = controller->axisX();
@@ -173,7 +179,7 @@ void BP32Driver::Bluepad32Driver::readControllerData(BP32Data::PackedControllerD
     data.brake = controller->brake();
     data.throttle = controller->throttle();
     data.buttons = controller->buttons();
-    data.misc_buttons = static_cast<uint8_t>(controller>->miscButtons());
+    data.misc_buttons = static_cast<uint8_t>(controller->miscButtons());
     data.gyro[0] = controller->gyroX();
     data.gyro[1] = controller->gyroY();
     data.gyro[2] = controller->gyroZ();
@@ -184,7 +190,7 @@ void BP32Driver::Bluepad32Driver::readControllerData(BP32Data::PackedControllerD
 
 void dump_bluepad_driver_data(const BP32Data::PackedControllerData & data) {
     if (data.id != -1) {
-        LOG_D(  "dpad: 0x%02x, buttons: 0x%04x, "
+        ESP_LOGD(kBp32Tag,   "dpad: 0x%02x, buttons: 0x%04x, "
                 "axis L: %4li, %4li, axis R: %4li, %4li, "
                 "brake: %4ld, throttle: %4li, misc: 0x%02x, "
                 "gyro x:%6d y:%6d z:%6d, accel x:%6d y:%6d z:%6d, ",

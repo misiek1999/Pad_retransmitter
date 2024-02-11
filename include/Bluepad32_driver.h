@@ -15,7 +15,7 @@ public:
     bool init();
     bool checkDriverIsInitialized() const;
     void forgetBluetoothKeys();
-    bool processGamepad(BP32Data::PackedControllerData &updated_data, size_t gamepad_index = 0);
+    bool processGamepad(BP32Data::PackedControllerData &updated_data);
 private:
     // initialize flag, active when bluepad32 task is working
     std::atomic<bool> _is_initialized;
@@ -27,7 +27,7 @@ private:
     // check provaided index is valid
     bool isIndexValid(size_t index) const;
     // read data from controller and convert to PackedControllerData
-    void readControllerData(BP32Data::PackedControllerData &data, ControllerPtr controller);
+    void copyControllerData(BP32Data::PackedControllerData &data, ControllerPtr controller);
 };
 
 // Debug function to dump bluepad32 data

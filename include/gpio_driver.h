@@ -3,13 +3,9 @@
 #include <Arduino.h>
 #include "pinout.h"
 
-namespace GPIO
+namespace GPIO_PIN
 {
 
-void init_led()    {
-    pinMode(kPowerLedPin, OUTPUT);
-    pinMode(KControllerConnectedLedPin, OUTPUT);
-    digitalWrite(kPowerLedPin, HIGH);   // Turn on power led
-}
+void init_led();
 
-}   // namespace GPIO
+}   // namespace GPIO_PIN

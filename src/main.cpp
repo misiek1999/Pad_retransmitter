@@ -2,10 +2,14 @@
 #include <nRF24L01.h>
 #include <log_debug.h>
 #include "Bluepad32_driver.h"
+#include "nrf24_driver.h"
 #include "gpio_driver.h"
+
+constexpr size_t kMainLoopDelay = 150;
 
 BP32Driver::Bluepad32Driver bp32_driver;
 BP32Data::PackedControllerData data;
+RF24Driver::NRF24Controller nrf24_driver;
 
 // Arduino setup function. Runs in CPU 1
 void setup() {
@@ -27,11 +31,12 @@ void setup() {
     // But might also fix some connection / re-connection issues.
     bp32_driver.forgetBluetoothKeys();
 
-    LOG_I("Initialization successful!");
-
+    // Init nrf24
+    nrf24_driver.init();
     // Init GPIO
-    GPIO::init_led();
+    GPIO_PIN::init_led();
 
+    LOG_I("Initialization successful!");
 }
 
 // Arduino loop function. Runs in CPU 1
@@ -39,6 +44,15 @@ void loop() {
     // Update bluepad32
     bp32_driver.processGamepad(data);
     BP32Driver::dump_bluepad_driver_data(data);
+
+    // try to init if not initialized
+    if (nrf24_driver.checkDriverIsInitialized() == false) {
+        Serial.println("NRF24 not initialized, try to init");
+        nrf24_driver.init();
+    }
+    // Send gamepad data to receiver
+    nrf24_driver.sendGamepadData(data);
+
     // Delay 150ms
-    delay(150);
+    delay(kMainLoopDelay);
 }
