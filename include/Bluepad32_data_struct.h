@@ -9,8 +9,8 @@
 
 namespace BP32Data
 {
-// #pragma pack(1) // use 1 byte alignment to avoid padding
-struct PackedControllerData   // struct copy from bluepad32 library
+// use 1 byte alignment to avoid padding
+struct __attribute__((packed)) PackedControllerData   // struct copy from bluepad32 library
 {
     int8_t id;          // index of current controller, -1 means no controller is connected
     // Usage Page: 0x01 (Generic Desktop Controls)
