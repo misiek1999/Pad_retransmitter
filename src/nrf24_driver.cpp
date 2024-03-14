@@ -6,8 +6,8 @@ constexpr char kNrf24ControllerTag[] = "NRF24";
 int RF24Driver::NRF24Controller::count = 0;
 
 RF24Driver::NRF24Controller::NRF24Controller():
-        radio_(GPIO_PIN::kRF24L01CEPin, GPIO_PIN::kRF24L01CNSPin){
-    is_initialized_ = false;
+        radio_(GPIO_PIN::kRF24L01CEPin, GPIO_PIN::kRF24L01CNSPin),
+        is_initialized_(false) {
     count++;
 }
 
@@ -24,15 +24,18 @@ bool RF24Driver::NRF24Controller::init() {
     }
     if (radio_.begin()) {
         ESP_LOGI(kNrf24ControllerTag, "NRF24Controller initialization begin.");
-        radio_.setPALevel(RF24_PA_HIGH);
-        radio_.setDataRate(RF24_250KBPS);
+        // radio_.setPALevel(RF24_PA_HIGH);
+        radio_.setPALevel(RF24_PA_LOW);
+        // radio_.setDataRate(RF24_250KBPS);
         radio_.setPayloadSize(sizeof(BP32Data::PackedControllerData));
-        ESP_LOGD(kNrf24ControllerTag, "Set payload size to %d", sizeof(BP32Data::PackedControllerData));
+        ESP_LOGI(kNrf24ControllerTag, "Payload set to: %d.", sizeof(BP32Data::PackedControllerData));
+        // radio_.enableDynamicPayloads();
         radio_.openWritingPipe(RF24Driver::address_tx);
         radio_.openReadingPipe(1, RF24Driver::address_rx);
         radio_.stopListening();
         this->is_initialized_ = true;
         result = true;
+        radio_.printPrettyDetails();
         ESP_LOGI(kNrf24ControllerTag, "NRF24Controller initialization done");
     } else {
         ESP_LOGW(kNrf24ControllerTag, "NRF24Controller initialization failed");

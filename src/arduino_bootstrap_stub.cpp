@@ -2,5 +2,7 @@
 
 // stub this file to avoid double execution of setup() and loop()
 extern "C" {
-void arduino_bootstrap() {}
+void arduino_bootstrap() {
+    // do nothing
+}
 }
