@@ -6,8 +6,8 @@
         "espressif32"
     ],
     "build": {
-        "includeDir": ".",
-        "srcDir": ".",
+        "includeDir": "btstack",
+        "srcDir": "btstack",
         "srcFilter": [
             "+<**/*.c>",
             "+<**/*.cpp>",
@@ -28,19 +28,20 @@
         ],
         "flags": [
             "-w",
-            "-I 3rd-party/lc3-google/include",
-            "-I 3rd-party/micro-ecc",
-            "-I 3rd-party/bluedroid/decoder/include",
-            "-I 3rd-party/bluedroid/encoder/include",
-            "-I 3rd-party/md5",
-            "-I 3rd-party/yxml",
-            "-I platform/embedded",
-            "-I platform/freertos",
-            "-I platform/freertos/include",
-            "-I port/esp32/components/btstack",
-            "-I port/esp32/components/btstack/include",
-            "-I src",
-            "-D sdp_init(arg)=sdp_init2(arg)"
+            "-I btstack/3rd-party/lc3-google/include",
+            "-I btstack/3rd-party/micro-ecc",
+            "-I btstack/3rd-party/bluedroid/decoder/include",
+            "-I btstack/3rd-party/bluedroid/encoder/include",
+            "-I btstack/3rd-party/md5",
+            "-I btstack/3rd-party/yxml",
+            "-I btstack/platform/embedded",
+            "-I btstack/platform/freertos",
+            "-I btstack/platform/freertos/include",
+            "-I btstack/port/esp32/components/btstack",
+            "-I btstack/port/esp32/components/btstack/include",
+            "-I btstack/src",
+            "-D sdp_init(arg)=sdp_init2(arg)",
+            "-D sdp_deinit(arg)=sdp_deinit2(arg)"
         ]
     }
 }

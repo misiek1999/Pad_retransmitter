@@ -1,4 +1,6 @@
 #include "Bluepad32_driver.h"
+#include <esp_bt_main.h>
+#include <esp_bt.h>
 #include <esp32-hal-log.h>
 #include <btstack.h>
 #include <Bluepad32.h>
@@ -9,11 +11,9 @@ extern "C" {
 #include <uni_bt_setup.h>
 #include <uni_bt_allowlist.h>
 #include <uni_virtual_device.h>
-#include "Bluepad32_driver.h"
 }
 
-namespace BP32Driver
-{
+namespace BP32Driver {
 constexpr size_t kBLuepad32TaskMaxStackSize = 20000;
 static constexpr char kBp32Tag[] = "BP32";
 
@@ -22,7 +22,7 @@ std::atomic<bool> _driver_is_init(false);
 TaskHandle_t Bluepad32Task;
 std::atomic<bool> driver_setup_complete(false);
 
-void bluepad32_and_btstack_run_loop_execute( void * pvParameters ){
+void bluepad32_and_btstack_run_loop_execute(void * pvParameters ) {
     ESP_LOGD(kBp32Tag, "Btstack core ID: %d", xPortGetCoreID());
 
     // Init btstack
@@ -50,7 +50,12 @@ void init_driver() {
     if (_driver_is_init == false) {
         _driver_is_init = true;
         // Stop default arduino bluetooth stack
+        esp_bluedroid_disable();
+        esp_bluedroid_deinit();
+        esp_bt_controller_disable();
+        esp_bt_controller_deinit();
         btStop();
+
         ESP_LOGD(kBp32Tag, "Start Btstack task");
         xTaskCreatePinnedToCore(
                         bluepad32_and_btstack_run_loop_execute, /* Task function. */
@@ -95,8 +100,9 @@ bool BP32Driver::Bluepad32Driver::checkDriverIsInitialized() const {
 }
 
 void BP32Driver::Bluepad32Driver::forgetBluetoothKeys() {
-    if(_is_initialized) {
+    if (_is_initialized) {
         BP32.forgetBluetoothKeys();
+        BP32.enableNewBluetoothConnections(true);
     }
 }
 
