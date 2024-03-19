@@ -29,10 +29,10 @@ struct PackedControllerData   // struct copy from bluepad32 library
     uint16_t buttons;   // A, B, X, Y
 
     // Misc buttons (from 0x0c (Consumer) and others)
-    // uint8_t misc_buttons;   //
+    uint8_t misc_buttons;   //
 
-    // int32_t gyro[3];        // deg/sec
-    // int32_t accel[3];       // G/s
+    int32_t gyro[3];        // deg/sec
+    int32_t accel[3];       // G/s
 };
 
 namespace ControllerButtonConst
@@ -73,7 +73,7 @@ public:
 
     uint8_t dpad() const { return _controller_data.dpad; }
     uint16_t buttons() const { return _controller_data.buttons; }
-    // uint8_t miscButtons() const { return _controller_data.misc_buttons; }
+    uint8_t miscButtons() const { return _controller_data.misc_buttons; }
     // Axis
     int32_t axisX() const { return _controller_data.axis_x; }
     int32_t axisY() const { return _controller_data.axis_y; }
@@ -85,12 +85,12 @@ public:
     int32_t throttle() const { return _controller_data.throttle; }
 
     // Gyro / Accel
-    // int32_t gyroX() const { return _controller_data.gyro[0]; }
-    // int32_t gyroY() const { return _controller_data.gyro[1]; }
-    // int32_t gyroZ() const { return _controller_data.gyro[2]; }
-    // int32_t accelX() const { return _controller_data.accel[0]; }
-    // int32_t accelY() const { return _controller_data.accel[1]; }
-    // int32_t accelZ() const { return _controller_data.accel[2]; }
+    int32_t gyroX() const { return _controller_data.gyro[0]; }
+    int32_t gyroY() const { return _controller_data.gyro[1]; }
+    int32_t gyroZ() const { return _controller_data.gyro[2]; }
+    int32_t accelX() const { return _controller_data.accel[0]; }
+    int32_t accelY() const { return _controller_data.accel[1]; }
+    int32_t accelZ() const { return _controller_data.accel[2]; }
 
     bool a() const { return buttons() & ControllerButtonConst::kButtonA; }
     bool b() const { return buttons() & ControllerButtonConst::kButtonB; }
@@ -104,10 +104,10 @@ public:
     bool thumbR() const { return buttons() & ControllerButtonConst::kButtonThumbR; }
 
     // Misc buttons
-    // bool miscSystem() const { return miscButtons() & ControllerMiscConst::kButtonSystem; }
-    // bool miscSelect() const { return miscButtons() & ControllerMiscConst::kButtonSelect; }
-    // bool miscStart() const { return miscButtons() & ControllerMiscConst::kButtonStart; }
-    // bool miscCapture() const { return miscButtons() & ControllerMiscConst::kButtonCapture; }
+    bool miscSystem() const { return miscButtons() & ControllerMiscConst::kButtonSystem; }
+    bool miscSelect() const { return miscButtons() & ControllerMiscConst::kButtonSelect; }
+    bool miscStart() const { return miscButtons() & ControllerMiscConst::kButtonStart; }
+    bool miscCapture() const { return miscButtons() & ControllerMiscConst::kButtonCapture; }
 
 private:
     PackedControllerData _controller_data;

@@ -185,36 +185,36 @@ void BP32Driver::Bluepad32Driver::copyControllerData(BP32Data::PackedControllerD
     data.brake = controller->brake();
     data.throttle = controller->throttle();
     data.buttons = controller->buttons();
-    // data.misc_buttons = static_cast<uint8_t>(controller->miscButtons());
-    // data.gyro[0] = controller->gyroX();
-    // data.gyro[1] = controller->gyroY();
-    // data.gyro[2] = controller->gyroZ();
-    // data.accel[0] = controller->accelX();
-    // data.accel[1] = controller->accelY();
-    // data.accel[2] = controller->accelZ();
+    data.misc_buttons = static_cast<uint8_t>(controller->miscButtons());
+    data.gyro[0] = controller->gyroX();
+    data.gyro[1] = controller->gyroY();
+    data.gyro[2] = controller->gyroZ();
+    data.accel[0] = controller->accelX();
+    data.accel[1] = controller->accelY();
+    data.accel[2] = controller->accelZ();
 }
 
 void dump_bluepad_driver_data(const BP32Data::PackedControllerData & data) {
     if (data.id != -1) {
         ESP_LOGD(kBp32Tag,   "dpad: 0x%02x, buttons: 0x%04x, "
                 "axis L: %4li, %4li, axis R: %4li, %4li, "
-                "brake: %4ld, throttle: %4li,",// misc: 0x%02x, "
-                //"gyro x:%6d y:%6d z:%6d, accel x:%6d y:%6d z:%6d, ",
-                data.dpad,          // DPAD
+                "brake: %4ld, throttle: %4li, misc: 0x%02x, ",
+                "gyro x:%6d y:%6d z:%6d, accel x:%6d y:%6d z:%6d, ",
+                static_cast<int>(data.dpad),          // DPAD
                 data.buttons,       // bitmask of pressed buttons
-                data.axis_rx,       // (-511 - 512) left X Axis
-                data.axis_ry,       // (-511 - 512) left Y axis
-                data.axis_x,        // (-511 - 512) right X axis
-                data.axis_y,        // (-511 - 512) right Y axis
+                data.axis_x,       // (-511 - 512) left X Axis
+                data.axis_y,       // (-511 - 512) left Y axis
+                data.axis_rx,        // (-511 - 512) right X axis
+                data.axis_ry,        // (-511 - 512) right Y axis
                 data.brake,         // (0 - 1023): brake button
-                data.throttle      // (0 - 1023): throttle (AKA gas) button
-                // data.misc_buttons,  // bitmak of pressed "misc" buttons
-                // data.gyro[0],       // Gyro X
-                // data.gyro[1],       // Gyro Y
-                // data.gyro[2],       // Gyro Z
-                // data.accel[0],      // Accelerometer X
-                // data.accel[1],      // Accelerometer Y
-                // data.accel[2]      // Accelerometer Z
+                data.throttle,      // (0 - 1023): throttle (AKA gas) button
+                static_cast<int>(data.misc_buttons),  // bitmak of pressed "misc" buttons
+                data.gyro[0],       // Gyro X
+                data.gyro[1],       // Gyro Y
+                data.gyro[2],       // Gyro Z
+                data.accel[0],      // Accelerometer X
+                data.accel[1],      // Accelerometer Y
+                data.accel[2]      // Accelerometer Z
         );
     }
 }
